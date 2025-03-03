@@ -95,13 +95,13 @@ def scale_to_range_tensor(values, old_min, old_max, new_min, new_max):
     scaled_values = new_min + (new_max - new_min) * (values - old_min) / (old_max - old_min)
     return torch.round(scaled_values)
 
-def ensure_unique(values, min_val, max_val):
+def ensure_unique(values, min_val, max_val, num_values):
     unique_values = set()
-    for i in range(values.shape[1]):
-        while values[0, i].item() in unique_values:
-            values[0, i] = random.randint(min_val, max_val)
-        unique_values.add(values[0, i].item())
-    return values
+    while len(unique_values) < num_values:
+        value = random.randint(min_val, max_val)
+        if value not in unique_values:
+            unique_values.add(value)
+    return torch.tensor(list(unique_values), dtype=torch.int32).unsqueeze(0)
 
 if __name__ == '__main__':
     seq_length = 10
@@ -109,17 +109,18 @@ if __name__ == '__main__':
     num_layers = 2
     num_epochs = 200
 
-    red_train, red_target, blue_train, blue_target, red_mean, red_std, blue_mean, blue_std = process_data(seq_length)
+    red_train, red_target, blue_train, blue_target, red_mean, red_std, blue_mean, blue_std = process_data(seq_length)  
 
     red_model = train_model(red_train.size(-1), hidden_size, red_train.size(-1), num_layers, red_train, red_target, num_epochs)
     red_predictions = predict(red_model, red_train[-1])
     red_predictions = red_predictions * red_std + red_mean  # 反标准化
     red_predictions = scale_to_range_tensor(red_predictions, red_predictions.min().item(), red_predictions.max().item(), 1, 33)
-    red_predictions = ensure_unique(red_predictions, 1, 33)
+    red_predictions = ensure_unique(red_predictions, 1, 33, 6)
     print("Red Ball Predictions (1-33):", red_predictions.int().tolist()[0])
 
     blue_model = train_model(blue_train.size(-1), hidden_size, blue_train.size(-1), num_layers, blue_train, blue_target, num_epochs)
     blue_predictions = predict(blue_model, blue_train[-1])
     blue_predictions = blue_predictions * blue_std + blue_mean  # 反标准化
     blue_predictions = scale_to_range_tensor(blue_predictions, blue_predictions.min().item(), blue_predictions.max().item(), 1, 16)
-    print("Blue Ball Prediction (1-16):", blue_predictions.int().item())
+    blue_predictions = ensure_unique(blue_predictions, 1, 16, 1)
+    print("Blue Ball Prediction (1-16):", blue_predictions.int().tolist()[0])
