@@ -116,10 +116,10 @@ if __name__ == '__main__':
         red_model = train_model(red_train.size(-1), hidden_size, red_train.size(-1), num_layers, red_train, red_target, num_epochs)
         red_predictions = predict(red_model, red_train[-1])
         red_predictions = red_predictions * red_std + red_mean  # 反标准化
-        red_predictions = scale_to_range_tensor(red_predictions, red_predictions.min().item(), red_predictions.max().item(), 1, 33)  
-        red_predictions = ensure_unique(red_predictions, 1, 33, 6)  
+        red_predictions = scale_to_range_tensor(red_predictions, red_predictions.min().item(), red_predictions.max().item(), 1, 33)
+        red_predictions = ensure_unique(red_predictions, 1, 33, 6)
 
-        blue_model = train_model(blue_train.size(-1), hidden_size, blue_train.size(-1), num_layers, blue_train, blue_target, num_epochs)  
+        blue_model = train_model(blue_train.size(-1), hidden_size, blue_train.size(-1), num_layers, blue_train, blue_target, num_epochs)
         blue_predictions = predict(blue_model, blue_train[-1])
         blue_predictions = blue_predictions * blue_std + blue_mean  # 反标准化
         blue_predictions = scale_to_range_tensor(blue_predictions, blue_predictions.min().item(), blue_predictions.max().item(), 1, 16)
@@ -128,6 +128,8 @@ if __name__ == '__main__':
         results.append((red_predictions.int().tolist()[0], blue_predictions.int().tolist()[0]))
 
     # 输出所有结果
+    print("                            ")
+    print("           双色球预测结果")
 for i in range(len(results)):
     red, blue = results[i]
     red_formatted = [f"{num:02d}" for num in red]  # 格式化红球
