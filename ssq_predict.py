@@ -109,18 +109,29 @@ if __name__ == '__main__':
     num_layers = 2
     num_epochs = 200
 
-    red_train, red_target, blue_train, blue_target, red_mean, red_std, blue_mean, blue_std = process_data(seq_length)  
+    results = []  # 存储结果
+    for _ in range(5):  # 重复运行5次
+        red_train, red_target, blue_train, blue_target, red_mean, red_std, blue_mean, blue_std = process_data(seq_length)
 
-    red_model = train_model(red_train.size(-1), hidden_size, red_train.size(-1), num_layers, red_train, red_target, num_epochs)
-    red_predictions = predict(red_model, red_train[-1])
-    red_predictions = red_predictions * red_std + red_mean  # 反标准化
-    red_predictions = scale_to_range_tensor(red_predictions, red_predictions.min().item(), red_predictions.max().item(), 1, 33)
-    red_predictions = ensure_unique(red_predictions, 1, 33, 6)
-    print("Red Ball Predictions (1-33):", red_predictions.int().tolist()[0])
+        red_model = train_model(red_train.size(-1), hidden_size, red_train.size(-1), num_layers, red_train, red_target, num_epochs)
+        red_predictions = predict(red_model, red_train[-1])
+        red_predictions = red_predictions * red_std + red_mean  # 反标准化
+        red_predictions = scale_to_range_tensor(red_predictions, red_predictions.min().item(), red_predictions.max().item(), 1, 33)  
+        red_predictions = ensure_unique(red_predictions, 1, 33, 6)  
 
-    blue_model = train_model(blue_train.size(-1), hidden_size, blue_train.size(-1), num_layers, blue_train, blue_target, num_epochs)
-    blue_predictions = predict(blue_model, blue_train[-1])
-    blue_predictions = blue_predictions * blue_std + blue_mean  # 反标准化
-    blue_predictions = scale_to_range_tensor(blue_predictions, blue_predictions.min().item(), blue_predictions.max().item(), 1, 16)
-    blue_predictions = ensure_unique(blue_predictions, 1, 16, 1)
-    print("Blue Ball Prediction (1-16):", blue_predictions.int().tolist()[0])
+        blue_model = train_model(blue_train.size(-1), hidden_size, blue_train.size(-1), num_layers, blue_train, blue_target, num_epochs)  
+        blue_predictions = predict(blue_model, blue_train[-1])
+        blue_predictions = blue_predictions * blue_std + blue_mean  # 反标准化
+        blue_predictions = scale_to_range_tensor(blue_predictions, blue_predictions.min().item(), blue_predictions.max().item(), 1, 16)
+        blue_predictions = ensure_unique(blue_predictions, 1, 16, 1)
+
+        results.append((red_predictions.int().tolist()[0], blue_predictions.int().tolist()[0]))
+
+    # 输出所有结果
+for i in range(len(results)):
+    red, blue = results[i]
+    red_formatted = [f"{num:02d}" for num in red]  # 格式化红球
+    blue_formatted = f"{blue[0]:02d}"  # 格式化蓝球
+    print("------------------------------------")
+    print(f" {i + 1}: [{', '.join(red_formatted)}] - [{blue_formatted}]")
+print("------------------------------------")
