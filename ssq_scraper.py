@@ -10,7 +10,7 @@ response = requests.get(url)
 response.encoding = 'utf-8'  # 确保编码正确
 
 # 解析HTML内容
-soup = BeautifulSoup(response.text, 'html.parser')
+soup = BeautifulSoup(response.text， 'html.parser')
 
 # 定位包含开奖数据的表格体
 tbody = soup.find('tbody', id="tdata")
@@ -26,7 +26,7 @@ for tr in tbody.find_all('tr'):
         lottery_data.append([td.text for td in tds])
 
 # 写入CSV文件
-with open('ssq_lottery_data.csv', 'w', newline='', encoding='utf-8') as csvfile:
+with open('ssq_lottery_data.csv'， 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
     # 写入标题行
     # writer.writerow(['期号', '号码1', '号码2', '号码3', '号码4', '号码5', '号码6', '号码7'])
